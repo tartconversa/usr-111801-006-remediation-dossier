@@ -5,6 +5,7 @@ from .delivery import Delivery
 from .grants import Grants
 from .policy import Policies
 from .products import Products
+from .rectification import Rectification
 
 
 class Exchange:
@@ -15,6 +16,7 @@ class Exchange:
         self.policies = Policies(self.connection)
         self.products = Products(self.connection)
         self.delivery = Delivery(self.connection)
+        self.rectification = Rectification(self.connection)
 
     def history(self, subject):
         return history(self.connection, subject)

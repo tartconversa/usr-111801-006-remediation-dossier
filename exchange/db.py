@@ -49,6 +49,39 @@ CREATE TABLE IF NOT EXISTS audit (
     id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, actor TEXT NOT NULL,
     action TEXT NOT NULL, subject TEXT NOT NULL, details TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS rect_cases (
+    id TEXT PRIMARY KEY, scenic_area TEXT NOT NULL, notice TEXT NOT NULL,
+    opened_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS rect_requirements (
+    id TEXT PRIMARY KEY, case_id TEXT NOT NULL REFERENCES rect_cases(id),
+    seq INTEGER NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL,
+    UNIQUE(case_id,seq)
+);
+CREATE TABLE IF NOT EXISTS submission_batches (
+    id TEXT PRIMARY KEY, case_id TEXT NOT NULL REFERENCES rect_cases(id),
+    submitted_at TEXT NOT NULL, submitter TEXT NOT NULL, note TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS requirement_materials (
+    id TEXT NOT NULL, requirement_id TEXT NOT NULL REFERENCES rect_requirements(id),
+    version INTEGER NOT NULL, batch_id TEXT NOT NULL REFERENCES submission_batches(id),
+    payload TEXT NOT NULL, digest TEXT NOT NULL, submitted_at TEXT NOT NULL,
+    superseded INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY(requirement_id,version)
+);
+CREATE TABLE IF NOT EXISTS rect_reviews (
+    id TEXT PRIMARY KEY, requirement_id TEXT NOT NULL REFERENCES rect_requirements(id),
+    material_version INTEGER NOT NULL, reviewer TEXT NOT NULL, decision TEXT NOT NULL,
+    reason TEXT NOT NULL, reviewed_at TEXT NOT NULL, revoked INTEGER NOT NULL DEFAULT 0,
+    revoked_at TEXT, revoke_reason TEXT,
+    FOREIGN KEY(requirement_id,material_version)
+        REFERENCES requirement_materials(requirement_id,version)
+);
+CREATE TABLE IF NOT EXISTS rect_publications (
+    id TEXT PRIMARY KEY, case_id TEXT NOT NULL REFERENCES rect_cases(id),
+    created_at TEXT NOT NULL, publisher TEXT NOT NULL, state TEXT NOT NULL DEFAULT 'draft',
+    snapshot TEXT NOT NULL, digest TEXT NOT NULL
+);
 """
 
 
